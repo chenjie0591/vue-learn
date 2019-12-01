@@ -1,32 +1,32 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <!-- <m-parent></m-parent>
+    <button @click="passMsg"> 非父子组件传值-bus</button> -->
+    this is app
+    <router-link to="/home/3">home</router-link>
+    <button @click="toHome">home</button>
+    <router-view></router-view>
   </div>
 </template>
 
+<script>
+import bus from './util/bus'
+import MParent from './views/Parent'
+export default {
+  components: {
+    MParent,
+  },
+  methods: {
+    passMsg() {
+      bus.$emit('appmsg' , 'i am from app')
+    },
+    toHome(){
+      this.$router.push({path:'/home',query:{name:'zhangsan'}});
+      //this.$router.push({name:'home',params:{id:3}});
+    }
+  },
+}
+</script>
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
 
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>
