@@ -1,27 +1,19 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import text from './module/text'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    count: 0,
+  },
+  getters:{
   },
   mutations: {
-    add(state){
-      state.count ++
-    },
-    decrease(state){
-      state.count --
-    }
   },
   actions: {
-    delayAdd(context){
-      setTimeout(() => {
-        context.commit('add')
-      },1000);
-    }
   },
   modules: {
+    text
   }
 })

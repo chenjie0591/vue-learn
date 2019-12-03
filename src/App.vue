@@ -2,9 +2,9 @@
   <div id="app">
     <!-- <m-parent></m-parent>
     <button @click="passMsg"> 非父子组件传值-bus</button> -->
-    this is app
-    <router-link to="/home/3">home</router-link>
-    <button @click="toHome">home</button>
+    <!-- this is app -->
+    <!-- <router-link to="/home/3">home</router-link>
+    <button @click="toHome">home</button> -->
     <router-view></router-view>
   </div>
 </template>

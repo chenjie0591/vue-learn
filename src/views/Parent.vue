@@ -3,6 +3,7 @@
         <h1>Parent</h1>
         <h3>{{msg}}</h3>
         <h5>vuex <span style="color:red">{{showCount}}</span></h5>
+        <h5>vuex <span style="color:red">{{showDoubelCount}}</span></h5>
         <button @click="addClick">增加</button>
         <m-child :msg="mChildMsg" @showChildMsg="showMsg" ref="child"></m-child>
         <h3>{{childMsg}}</h3>
@@ -11,7 +12,7 @@
 
 <script>
     import MChild from './Child'
-    import {mapState,mapMutations,mapActions} from 'vuex'
+    import {mapState,mapMutations,mapActions,mapGetters} from 'vuex'
     export default {
         // computed: {
         //     count() {
@@ -20,8 +21,15 @@
         // },
         computed: {
             ...mapState({
-                showCount: 'count'
+                showCount: state => state.text.count
+            }),
+            ...mapGetters({
+                showDoubelCount: 'text/doubleCount'
+                //'doubleCount'
             })
+            // showDoubelCount(){
+            //     return this.$store.getters.doubleCount
+            // }
         },
         data() {
             return {
@@ -37,12 +45,12 @@
             showMsg(val) {
                 this.msg = val
             },
-            ...mapActions({
-                addClick:'delayAdd'
-            }),
-            // ...mapMutations({
-            //     addClick:'add'
+            // ...mapActions({
+            //     addClick:'delayAdd'
             // }),
+            ...mapMutations({
+                addClick:'text/add'
+            }),
             // ...mapMutations([
             //     'add'
             // ])

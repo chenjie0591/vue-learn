@@ -84,7 +84,7 @@
 
    + 新建组件Parent.vue , Child.vue
 
-     ```js
+     ```html
      //Parent.vue
      <template>
          <div>
@@ -132,7 +132,7 @@
      </style>
      ```
 
-     ```js
+     ```html
      //Child.vue
      <template>
          <div>
@@ -172,7 +172,7 @@
      </style>
      ```
 
-     ```js
+     ```html
      //App.vue
      <template>
        <div id="app">
@@ -361,6 +361,10 @@
 
    - actions： 异步改变state的方法，也可以是同步
 
+   - getters: 监听state内的值，发生该表时执行相应的方法
+   
+   - module:  对上面的4个属性进行分模块管理
+   
      ```js
      // /src/store/index.js 中申明 vuex的基本属性
      import Vue from 'vue'
@@ -372,6 +376,11 @@
        state: {
          count: 0,
        },
+       getters:{
+         doubleCount(state){
+           return state.count * 2
+         }
+       },
        mutations: {
          add(state){
            state.count ++
@@ -382,27 +391,27 @@
        },
        actions: {
          delayAdd(context){
-           setTimeout(() => {
+        setTimeout(() => {
              context.commit('add')
-           },1000);
+        },1000);
          }
-       },
+     },
        modules: {
-       }
+     }
      })
      ```
-
+    
      编辑路由，改变默认页面
-
+    
      ```json
-     {
+   {
        path : '/',
-       component: () => import('../views/Parent.vue')
+     component: () => import('../views/Parent.vue')
      }
      ```
-
+     
      基本使用
-
+     
      ```html
      <h5>vuex <span style="color:red">{{showCount}}</span></h5>
      <button @click="addClick">增加</button>
@@ -411,22 +420,25 @@
              computed: {
                 showCount() {
                     return this.$store.state.count
+                },
+                showDoubelCount(){
+                  return this.$store.getters.doubleCount
                 }
-             },
+          },
              methods: {
-                 add(){
+              add(){
                    	//调用mutations中的add方法
-                     this.$store.commit('add')
+                   this.$store.commit('add')
                    	//调用actions中的delayAdd方法
-                     //this.$store.dispatch('delayAdd')
+                   //this.$store.dispatch('delayAdd')
                  }
              },
          }
      </script>
      ```
-
+     
      使用辅助函数
-
+     
      ```html
      <h5>vuex <span style="color:red">{{showCount}}</span></h5>
      <button @click="addClick">增加</button>
@@ -436,6 +448,9 @@
              computed: {
                  ...mapState({
                      showCount: 'count' //等同于 this.$store.state.count
+                 }),
+               	...mapGetters({
+                     showDoubelCount: 'doubleCount'
                  })
              },
              methods: {
@@ -443,13 +458,114 @@
                  ...mapActions({
                    	//事件方法addClick,提交 this.$store.dispatch('delayAdd')
                      addClick:'delayAdd'
+              }),
+               
+            	// 当事件名称(@click) 与 Mutations方法名称不一样是，使用对象
+                 // ...mapMutations({
+               //     addClick:'add' //事件方法addClick，提交this.$store.commit('add')
+                 // }),
+             
+               	// 当事件名称(@click) 与 Mutations方法名称不一样是，使用数组
+                 // ...mapMutations([
+                 //     'add' //事件方法add，提交this.$store.commit('add')
+                 // ])
+             },
+         }
+     </script>
+     ```
+     
+     module的使用，在 store里新建文件夹module，然后在module里新建文件text.js
+     
+     ```js
+     //text.js
+     export default{
+         //namespaced: true,
+         state: {
+             count: 0,
+         },
+         getters:{
+             doubleCount(state){
+                 return state.count * 2
+             }
+         },
+         mutations: {
+             add(state){
+                 state.count ++
+             },
+             decrease(state){
+                 state.count --
+             }
+         },
+         actions: {
+             delayAdd(context){
+                 setTimeout(() => {
+                 context.commit('add')
+                 },1000);
+             }
+         }
+     }
+     ```
+     
+     ```js
+     // store/index.js
+     import Vue from 'vue'
+     import Vuex from 'vuex'
+     import text from './module/text'
+     
+     Vue.use(Vuex)
+     
+     export default new Vuex.Store({
+       state: {
+       },
+       getters:{
+       },
+       mutations: {
+       },
+       actions: {
+       },
+       modules: {
+         text
+       }
+     })
+     ```
+     
+     ```html
+     <!--Parent.vue-->
+     <!--注意：模块内部的 action、mutation 和 getter 默认是注册在全局命名空间的-->
+     <!--如果只想在模块内部生效，则需要加上 namespaced: true 详见 module/text.js 的备注部分-->
+     <!--其他组件(getters,Mutations,Actions)则需要 模块名/名称 详见以下代码-->
+     <h5>vuex <span style="color:red">{{showCount}}</span></h5>
+     <button @click="addClick">增加</button>
+     <script>
+         import {mapState,mapMutations,mapActions} from 'vuex'
+         export default {
+             computed: {
+                 ...mapState({
+                     showCount: state => state.text.count
+                 }),
+               	...mapGetters({
+                     showDoubelCount: 'doubleCount'
+                   	// 如果 namespaced: true ，则使用以下代码
+                   	// showDoubelCount: 'text/doubleCount'
+                 })
+             },
+             methods: {
+               	//事件名称与Actions方法名与Mutations一样
+                 ...mapActions({
+                   	//事件方法addClick,提交 this.$store.dispatch('delayAdd')
+                     addClick:'delayAdd'
+                   	// 如果 namespaced: true ，则使用以下代码
+                   	// addClick:'text/delayAdd'
                  }),
                
                	// 当事件名称(@click) 与 Mutations方法名称不一样是，使用对象
                  // ...mapMutations({
                  //     addClick:'add' //事件方法addClick，提交this.$store.commit('add')
+               				// 如果 namespaced: true ，则使用以下代码
+                   		// addClick:'text/add'
                  // }),
                
+               	// 如果 namespaced: true ，无法使用以下方式
                	// 当事件名称(@click) 与 Mutations方法名称不一样是，使用数组
                  // ...mapMutations([
                  //     'add' //事件方法add，提交this.$store.commit('add')
@@ -459,6 +575,240 @@
      </script>
      ```
 
+5. element-ui
+
+   + 安装
+
+     ```
+     控制台运行: yarn add element-ui -S
      
+     在main.js上添加
+     import ElementUI from 'element-ui';
+     import 'element-ui/lib/theme-chalk/index.css';
+     
+     Vue.use(ElementUI);
+     ```
+
+   + 在view下新建文件夹element 存放element相关的组件
+
+   + layout 布局
+
+     ```html
+     <template>
+       <div>
+         <!--layout布局-->
+         <h3>4等分布局</h3>
+         <el-row :gutter="20">
+           <el-col :span="6">
+             <div class="content">1</div>
+           </el-col>
+           <el-col :span="6">
+             <div class="content">2</div>
+           </el-col>
+           <el-col :span="6">
+             <div class="content">3</div>
+           </el-col>
+           <el-col :span="6">
+             <div class="content">4</div>
+           </el-col>
+         </el-row>
+         <!--container布局，整体框架-->
+         <el-container>
+           <el-header>Header</el-header>
+           <el-container>
+             <el-aside width="200px">Aside</el-aside>
+             <el-main>Main</el-main>
+           </el-container>
+         </el-container>
+       </div>
+     </template>
+     
+     <script>
+     export default {};
+     </script>
+     
+     <style scoped>
+     .content {
+       background-color: #000;
+       color: #ffffff;
+     }
+     
+     .el-header, .el-footer {
+         background-color: #B3C0D1;
+         color: #333;
+         text-align: center;
+         line-height: 60px;
+       }
+       
+       .el-aside {
+         background-color: #D3DCE6;
+         color: #333;
+         text-align: center;
+         line-height: 200px;
+       }
+       
+       .el-main {
+         background-color: #E9EEF3;
+         color: #333;
+         text-align: center;
+         line-height: 160px;
+       }
+       
+       body > .el-container {
+         margin-bottom: 40px;
+       }
+       
+       .el-container:nth-child(5) .el-aside,
+       .el-container:nth-child(6) .el-aside {
+         line-height: 260px;
+       }
+       
+       .el-container:nth-child(7) .el-aside {
+         line-height: 320px;
+       }
+     </style>
+     ```
+
+   + 弹出类型组件
+
+     ```html
+     <template>
+       <div>
+         <!-- Table -->
+         <el-button type="text" @click="dialogTableVisible = true">打开嵌套表格的 Dialog</el-button>
+     
+         <el-dialog title="收货地址" :visible.sync="dialogTableVisible">
+           <el-table :data="gridData">
+             <el-table-column property="date" label="日期" width="150"></el-table-column>
+             <el-table-column property="name" label="姓名" width="200"></el-table-column>
+             <el-table-column property="address" label="地址"></el-table-column>
+           </el-table>
+         </el-dialog>
+     
+         <!-- Form -->
+         <el-button type="text" @click="dialogFormVisible = true">打开嵌套表单的 Dialog</el-button>
+     
+         <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+           <el-form :model="form">
+             <el-form-item label="活动名称" :label-width="formLabelWidth">
+               <el-input v-model="form.name" autocomplete="off"></el-input>
+             </el-form-item>
+             <el-form-item label="活动区域" :label-width="formLabelWidth">
+               <el-select v-model="form.region" placeholder="请选择活动区域">
+                 <el-option label="区域一" value="shanghai"></el-option>
+                 <el-option label="区域二" value="beijing"></el-option>
+               </el-select>
+             </el-form-item>
+           </el-form>
+           <div slot="footer" class="dialog-footer">
+             <el-button @click="dialogFormVisible = false">取 消</el-button>
+             <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+           </div>
+         </el-dialog>
+       </div>
+     </template>
+     
+     <script>
+     export default {
+       data() {
+           return {
+             gridData: [{
+               date: '2016-05-02',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1518 弄'
+             }, {
+               date: '2016-05-04',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1518 弄'
+             }, {
+               date: '2016-05-01',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1518 弄'
+             }, {
+               date: '2016-05-03',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1518 弄'
+             }],
+             dialogTableVisible: false,
+             dialogFormVisible: false,
+             form: {
+               name: '',
+               region: '',
+               date1: '',
+               date2: '',
+               delivery: false,
+               type: [],
+               resource: '',
+               desc: ''
+             },
+             formLabelWidth: '120px'
+           };
+         }
+     };
+     </script>
+     
+     <style scoped>
+     </style>
+     ```
+
+   + 表格
+
+     ```html
+     <template>
+       <div>
+         <el-table ref="singleTable" :data="tableData" highlight-current-row @current-change="handleCurrentChange" style="width: 100%">
+           <el-table-column type="index" width="50"></el-table-column>
+           <el-table-column property="date" label="日期" width="120"></el-table-column>
+           <el-table-column property="name" label="姓名" width="120"></el-table-column>
+           <el-table-column property="address" label="地址"></el-table-column>
+         </el-table>
+         <div style="margin-top: 20px">
+           <el-button @click="setCurrent(tableData[1])">选中第二行</el-button>
+           <el-button @click="setCurrent()">取消选择</el-button>
+         </div>
+       </div>
+     </template>
+     
+     <script>
+     export default {
+       data() {
+         return {
+             tableData: [{
+               date: '2016-05-02',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1518 弄'
+             }, {
+               date: '2016-05-04',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1517 弄'
+             }, {
+               date: '2016-05-01',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1519 弄'
+             }, {
+               date: '2016-05-03',
+               name: '王小虎',
+               address: '上海市普陀区金沙江路 1516 弄'
+             }],
+             currentRow: null
+         }
+       },
+       methods: {
+           setCurrent(row) {
+             this.$refs.singleTable.setCurrentRow(row);
+           },
+           handleCurrentChange(currentRow , oldCurrentRow) {
+             console.log('currentRow' , currentRow);
+             console.log('oldCurrentRow' , oldCurrentRow);
+             this.currentRow = currentRow;
+           }
+       },
+     };
+     </script>
+     
+     <style lang="scss" scoped>
+     </style>
+     ```
 
      
+
