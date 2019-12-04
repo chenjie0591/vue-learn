@@ -400,9 +400,9 @@
      }
      })
      ```
-    
+   
      编辑路由，改变默认页面
-    
+   
      ```json
    {
        path : '/',
@@ -810,5 +810,22 @@
      </style>
      ```
 
-     
 
+6. 命令行方式创建工程
+
+   ```
+   vue create vue-manage-system
+   选择 Manually select features
+   选择 Babel,Router,Vuex,Css Pre-processors,Linter/Formatter（使用空格来勾选），完成后按回车
+   输入 n
+   选择 Sass/SCSS(with node-sass)
+   选择 ESLint + Prettier
+   选择 Lint on save
+   选择 In dedicated config files
+   输入 y
+   输入 名称
+   
+   
+   ```
+
+   
